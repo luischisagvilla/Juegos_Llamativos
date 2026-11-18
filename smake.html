@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Juego 2 · Snake</title>
+  <link rel="stylesheet" href="./css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+
+  <main class="container min-vh-100 py-2">
+    <div class="row">
+      <div class="col-12 col-md-8 col-lg-5 mx-auto">
+
+        <!-- ============================================================
+             SECCIÓN 1 · BARRA SUPERIOR / HUD  (RF-04, RF-05)
+             ============================================================ -->
+        <section id="seccionHud" class="bg-dark text-light rounded shadow-sm p-2 mb-2" aria-label="Marcador del juego">
+          <!-- Fila 1: Pausa | Puntaje + Tiempo | Salir -->
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <button id="btnPausa" type="button" class="btn btn-outline-light fw-bold px-3" aria-label="Pausar o reanudar">II</button>
+            <div class="text-center">
+              <span id="hudPuntaje" class="fw-bold fs-5 font-monospace">0 pts</span>
+              <span class="mx-1 text-secondary" aria-hidden="true">|</span>
+              <span id="hudTiempo" class="fw-bold fs-5 font-monospace" aria-label="Tiempo restante">01:00</span>
+            </div>
+            <a id="btnSalir" href="index.html" class="btn btn-outline-danger fw-bold px-3" aria-label="Salir al inicio">X</a>
+          </div>
+          <!-- Fila 2: Racha + barra + multiplicador -->
+          <div class="d-flex align-items-center gap-2">
+            <span class="small fw-semibold">Racha</span>
+            <div class="progress flex-grow-1 bg-secondary" role="progressbar" aria-label="Racha de manzanas" aria-valuenow="0" aria-valuemin="0" aria-valuemax="4" id="rachaProgress">
+              <div id="rachaBarra" class="progress-bar bg-success d-none"></div>
+            </div>
+            <span id="rachaBadge" class="badge text-bg-secondary font-monospace">x1</span>
+          </div>
+        </section>
+
+        <!-- ============================================================
+             SECCIÓN 2 · ÁREA CENTRAL DE JUEGO  (RF-02, RF-05)
+             ============================================================ -->
+        <section id="seccionJuego" aria-label="Área de juego">
+          <div class="bg-dark rounded p-2 shadow">
+            <div class="ratio ratio-1x1 border border-3 border-success rounded shadow">
+              <canvas id="snakeCanvas" width="400" height="400" class="w-100 h-100 bg-dark rounded"></canvas>
+              <!-- Superposición: cuenta regresiva / pausa -->
+              <div id="overlayJuego" class="d-flex flex-column align-items-center justify-content-center bg-dark bg-opacity-75 text-light rounded text-center" aria-live="assertive">
+                <div id="overlayTexto" class="display-1 fw-bold font-monospace">3</div>
+                <div id="overlaySub" class="small text-light-emphasis"></div>
+              </div>
+            </div>
+          </div>
+          <p class="d-none d-lg-block text-center text-muted small mt-2 mb-0">
+            Flechas / WASD para mover · Barra espaciadora para pausar
+          </p>
+        </section>
+
+        <!-- ============================================================
+             SECCIÓN 3 · CONTROLES TÁCTILES (zona del pulgar, RNF-01)
+             ============================================================ -->
+        <section id="seccionControles" class="d-lg-none mt-3" aria-label="Controles táctiles">
+          <div class="row justify-content-center g-2 mb-2">
+            <div class="col-4">
+              <button type="button" class="btn btn-dark btn-lg py-3 px-4 w-100 fw-bold" data-dir="up" aria-label="Arriba">▲</button>
+            </div>
+          </div>
+          <div class="row justify-content-center g-2 mb-2">
+            <div class="col-4">
+              <button type="button" class="btn btn-dark btn-lg py-3 px-4 w-100 fw-bold" data-dir="left" aria-label="Izquierda">◀</button>
+            </div>
+            <div class="col-4 offset-4">
+              <button type="button" class="btn btn-dark btn-lg py-3 px-4 w-100 fw-bold" data-dir="right" aria-label="Derecha">▶</button>
+            </div>
+          </div>
+          <div class="row justify-content-center g-2">
+            <div class="col-4">
+              <button type="button" class="btn btn-dark btn-lg py-3 px-4 w-100 fw-bold" data-dir="down" aria-label="Abajo">▼</button>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- ==============================================================
+       SECCIÓN 4 · MODAL DE FIN DE PARTIDA Y CAPTURA DE LEADS
+       (RF-08 a RF-16, RF-22)
+       ============================================================== -->
+  <section id="seccionModal" aria-label="Fin de partida">
+    <div class="modal fade" id="modalFin" tabindex="-1" aria-labelledby="modalFinTitulo" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+
+          <div class="modal-header bg-dark text-light justify-content-center">
+            <h2 id="modalFinTitulo" class="modal-title fs-4 fw-bold text-center">FIN DE PARTIDA</h2>
+          </div>
+
+          <div class="modal-body">
+
+            <!-- 4.1 · Vista: Resumen + formulario (RF-08 a RF-12) -->
+            <section id="vistaResumen" aria-label="Resumen y registro">
+              <p id="finMotivo" class="text-center text-muted small mb-3"></p>
+
+              <div class="row g-2 text-center mb-3">
+                <div class="col-4">
+                  <div class="border rounded bg-body-tertiary p-2 h-100">
+                    <div class="small text-muted">Puntaje</div>
+                    <div id="finPuntaje" class="fs-4 fw-bold font-monospace">0</div>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="border rounded bg-body-tertiary p-2 h-100">
+                    <div class="small text-muted">Posición</div>
+                    <div id="finPosicion" class="fs-4 fw-bold font-monospace">#1</div>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="border rounded bg-body-tertiary p-2 h-100">
+                    <div class="small text-muted">Premio</div>
+                    <div id="finPremio" class="fw-bold small">—</div>
+                  </div>
+                </div>
+              </div>
+              <p id="finDetalle" class="text-center small text-muted mb-3"></p>
+
+              <div id="avisoReutilizado" class="alert alert-info py-2 small d-none" role="status"></div>
+
+              <form id="formLead" novalidate>
+                <div class="mb-3">
+                  <label for="leadNombre" class="form-label fw-semibold">Nombre</label>
+                  <input type="text" class="form-control" id="leadNombre" name="nombre" maxlength="40" autocomplete="name" required>
+                  <div class="invalid-feedback" id="errNombre"></div>
+                </div>
+                <div class="mb-3">
+                  <label for="leadEmail" class="form-label fw-semibold">Correo electrónico</label>
+                  <input type="email" class="form-control" id="leadEmail" name="email" autocomplete="email" inputmode="email" required>
+                  <div class="invalid-feedback" id="errEmail"></div>
+                </div>
+                <div class="mb-3">
+                  <label for="leadTelefono" class="form-label fw-semibold">WhatsApp / Teléfono</label>
+                  <input type="tel" class="form-control" id="leadTelefono" name="telefono" autocomplete="tel" inputmode="tel" required>
+                  <div class="invalid-feedback" id="errTelefono"></div>
+                </div>
+                <div class="form-check mb-3">
+                  <input class="form-check-input" type="checkbox" id="leadConsent" required>
+                  <label class="form-check-label small" for="leadConsent">
+                    Acepto la <a href="#textoPrivacidad" role="button" data-bs-toggle="collapse" aria-expanded="false" aria-controls="textoPrivacidad">política de privacidad</a>
+                  </label>
+                </div>
+                <div class="collapse mb-3" id="textoPrivacidad">
+                  <div class="card card-body small text-muted">
+                    Texto simulado: usaremos tus datos únicamente para entregarte el premio y notificarte sobre el torneo.
+                    No compartimos tu correo ni tu teléfono; el ranking público solo muestra tu nombre y puntaje.
+                  </div>
+                </div>
+                <button type="submit" id="btnGuardar" class="btn btn-success w-100 fw-bold" disabled>Guardar puntaje y reclamar premio</button>
+              </form>
+            </section>
+
+            <!-- 4.2 · Vista: Ranking Top 5 (RF-15, RF-16) -->
+            <section id="vistaRanking" hidden aria-label="Ranking Top 5">
+              <div id="rankingMensaje" class="alert alert-success py-2 small text-center" role="status"></div>
+              <h3 class="fs-5 fw-bold text-center mb-3">🏆 Top 5 de jugadores</h3>
+              <ol id="listaRanking" class="list-group list-group-numbered mb-0"></ol>
+            </section>
+
+          </div>
+
+          <!-- 4.3 · Pie del modal -->
+          <div class="modal-footer flex-column align-items-stretch">
+            <section id="pieResumen" aria-label="Acciones del resumen">
+              <p class="text-center small text-muted mb-2">🔒 Sin spam. Datos seguros</p>
+              <div class="text-center">
+                <button type="button" id="btnAhoraNo" class="btn btn-link btn-sm text-secondary p-0">Ahora no (solo ver ranking)</button>
+              </div>
+            </section>
+            <section id="pieRanking" hidden aria-label="Acciones del ranking">
+              <button type="button" id="btnJugarDeNuevo" class="btn btn-success fw-bold w-100">Jugar de nuevo</button>
+            </section>
+            <button type="button" id="btnCompartir" class="btn btn-outline-primary btn-sm w-100">Compartir resultado</button>
+            <p id="compartirMsg" class="text-center small text-success mb-0" hidden role="status"></p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==============================================================
+       SECCIÓN 5 · SCRIPTS
+       ============================================================== -->
+  <script src="bootstrap.bundle.min.js"></script>
+  <script>
+  (() => {
+    'use strict';
+
+    /* ============================================================
+       SECCIÓN JS 1 · CONFIGURACIÓN Y PALETA
+       ============================================================ */
+    const CONFIG = {
+      DURACION_S: 60,            // duración de la partida (segundos)
+      CUADROS: 20,               // celdas por lado
+      CANVAS: 400,               // px internos del canvas
+      STEP_MS: 120,              // ms entre movimientos de la serpiente
+      PUNTOS_COMIDA: 50,         // puntos base por manzana
+      RACHA_MS: 4000,            // ventana para mantener la racha
+      RACHA_NIVEL_MAX: 4,        // niveles de la barra de racha
+      BONO_SUPERVIVENCIA: 100,   // bonificación si termina con vida
+      CUENTA_PASO_MS: 800,       // duración de cada paso de la cuenta regresiva
+      JUGAR_VISIBLE_MS: 600,     // tiempo que se ve "¡JUGAR!"
+      CONSENT_VERSION: 'v1.0',
+      UMBRAL_PREMIO_ALTO: 500,
+      UMBRAL_PREMIO_MEDIO: 200,
+      CLAVES: {
+        RANKING: 'snake_ranking',
+        LEADS: 'snake_leads',
+        PARTIDAS: 'snake_partidas',
+        ULTIMO_LEAD: 'snake_ultimo_lead'
+      }
+    };
+
+    // Paleta LCD estilo Nokia (solo se usa dentro del canvas)
+    const COLORES = {
+      fondo: '#C7F0D8',
+      grilla: '#B5DEC6',
+      pixel: '#43523D'
+    };
+
+    const RANKING_BASE = [
+      { id: 'base1', name: 'Valentina', score: 620, fecha: '2026-01-01T00:00:00.000Z' },
+      { id: 'base2', name: 'Mateo',     score: 450, fecha: '2026-01-01T00:00:00.000Z' },
+      { id: 'base3', name: 'Camila',    score: 340, fecha: '2026-01-01T00:00:00.000Z' },
+      { id: 'base4', name: 'Diego',     score: 220, fecha: '2026-01-01T00:00:00.000Z' },
+      { id: 'base5', name: 'Sofía',     score: 120, fecha: '2026-01-01T00:00:00.000Z' }
+    ];
+
+    /* ============================================================
+       SECCIÓN JS 2 · REFERENCIAS AL DOM
+       ============================================================ */
+    const $ = (id) => document.getElementById(id);
+
+    const canvas = $('snakeCanvas');
+    const ctx = canvas.getContext('2d');
+    const CELDA = CONFIG.CANVAS / CONFIG.CUADROS;
+
+    const el = {
+      puntaje: $('hudPuntaje'), tiempo: $('hudTiempo'),
+      btnPausa: $('btnPausa'),
+      rachaBarra: $('rachaBarra'), rachaProgress: $('rachaProgress'), rachaBadge: $('rachaBadge'),
+      overlay: $('overlayJuego'), overlayTexto: $('overlayTexto'), overlaySub: $('overlaySub'),
+      modal: $('modalFin'),
+      finMotivo: $('finMotivo'), finPuntaje: $('finPuntaje'), finPosicion: $('finPosicion'),
+      finPremio: $('finPremio'), finDetalle: $('finDetalle'), avisoReutilizado: $('avisoReutilizado'),
+      form: $('formLead'),
+      nombre: $('leadNombre'), email: $('leadEmail'), telefono: $('leadTelefono'), consent: $('leadConsent'),
+      errNombre: $('errNombre'), errEmail: $('errEmail'), errTelefono: $('errTelefono'),
+      btnGuardar: $('btnGuardar'),
+      vistaResumen: $('vistaResumen'), vistaRanking: $('vistaRanking'),
+      pieResumen: $('pieResumen'), pieRanking: $('pieRanking'),
+      listaRanking: $('listaRanking'), rankingMensaje: $('rankingMensaje'),
+      btnAhoraNo: $('btnAhoraNo'), btnJugarDeNuevo: $('btnJugarDeNuevo'),
+      compartirMsg: $('compartirMsg')
+    };
+
+    // El modal usa Bootstrap JS si está disponible; el juego NO depende de él para iniciar
+    let instanciaModal = null;
+    const modalFin = {
+      show() {
+        if (!instanciaModal && window.bootstrap && window.bootstrap.Modal) {
+          instanciaModal = new window.bootstrap.Modal(el.modal);
+        }
+        if (instanciaModal) { instanciaModal.show(); return; }
+        el.modal.classList.add('show', 'd-block');
+      },
+      hide() {
+        if (instanciaModal) { instanciaModal.hide(); return; }
+        el.modal.classList.remove('show', 'd-block');
+      }
+    };
+
+    /* ============================================================
+       SECCIÓN JS 3 · ALMACENAMIENTO (localStorage simula backend)
+       ============================================================ */
+    const almacen = {
+      leer(clave, porDefecto) {
+        try {
+          const crudo = localStorage.getItem(clave);
+          return crudo ? JSON.parse(crudo) : porDefecto;
+        } catch (e) { return porDefecto; }
+      },
+      guardar(clave, valor) {
+        try { localStorage.setItem(clave, JSON.stringify(valor)); } catch (e) { /* sin almacenamiento */ }
+      }
+    };
+
+    const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+    function obtenerRanking() {
+      let r = almacen.leer(CONFIG.CLAVES.RANKING, null);
+      if (!Array.isArray(r) || r.length === 0) {
+        r = RANKING_BASE.slice();
+        almacen.guardar(CONFIG.CLAVES.RANKING, r);
+      }
+      return r;
+    }
+
+    function ordenarRanking(r) {
+      // Mayor puntaje primero; en empate gana el más antiguo
+      return r.slice().sort((a, b) => (b.score - a.score) || (new Date(a.fecha) - new Date(b.fecha)));
+    }
+
+    /* ============================================================
+       SECCIÓN JS 4 · ESTADO DEL JUEGO
+       ============================================================ */
+    const DIRS = {
+      up: { x: 0, y: -1 }, down: { x: 0, y: 1 },
+      left: { x: -1, y: 0 }, right: { x: 1, y: 0 }
+    };
+
+    const juego = {
+      estado: 'cuenta',          // cuenta | jugando | pausa | fin
+      estadoPrevio: 'cuenta',
+      id: '',
+      serpiente: [],
+      dir: DIRS.right,
+      cola: [],
+      comida: { x: 0, y: 0 },
+      puntaje: 0,
+      tiempoRestante: CONFIG.DURACION_S * 1000,
+      reloj: 0,                  // reloj de juego (no avanza en pausa)
+      acumulador: 0,
+      cuentaMs: 0,
+      overlayMs: 0,
+      nivelRacha: 0,
+      ultimaComida: 0,
+      bono: 0,
+      motivo: '',
+      guardado: false,
+      idUltimoGuardado: ''
+    };
+
+    function reiniciar() {
+      const mid = Math.floor(CONFIG.CUADROS / 2);
+      juego.id = uid();
+      juego.serpiente = [{ x: mid, y: mid }, { x: mid - 1, y: mid }, { x: mid - 2, y: mid }];
+      juego.dir = DIRS.right;
+      juego.cola = [];
+      juego.puntaje = 0;
+      juego.tiempoRestante = CONFIG.DURACION_S * 1000;
+      juego.reloj = 0;
+      juego.acumulador = 0;
+      juego.cuentaMs = 0;
+      juego.overlayMs = 0;
+      juego.nivelRacha = 0;
+      juego.ultimaComida = 0;
+      juego.bono = 0;
+      juego.motivo = '';
+      juego.guardado = false;
+      juego.idUltimoGuardado = '';
+      juego.estado = 'cuenta';
+      colocarComida();
+      el.btnPausa.textContent = 'II';
+      actualizarHud(true);
+      actualizarRachaUI(true);
+      mostrarOverlay('3', '');
+    }
+
+    function colocarComida() {
+      const libres = [];
+      for (let x = 0; x < CONFIG.CUADROS; x++) {
+        for (let y = 0; y < CONFIG.CUADROS; y++) {
+          if (!juego.serpiente.some((s) => s.x === x && s.y === y)) libres.push({ x, y });
+        }
+      }
+      juego.comida = libres[Math.floor(Math.random() * libres.length)] || { x: 0, y: 0 };
+    }
+
+    /* ============================================================
+       SECCIÓN JS 5 · HUD, RACHA Y SUPERPOSICIÓN
+       ============================================================ */
+    let cacheHud = { p: null, t: null };
+
+    function formatoTiempo(ms) {
+      const s = Math.max(0, Math.ceil(ms / 1000));
+      return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+    }
+
+    function actualizarHud(forzar) {
+      const p = juego.puntaje + ' pts';
+      const t = formatoTiempo(juego.tiempoRestante);
+      if (forzar || p !== cacheHud.p) { el.puntaje.textContent = p; cacheHud.p = p; }
+      if (forzar || t !== cacheHud.t) { el.tiempo.textContent = t; cacheHud.t = t; }
+    }
+
+    const CLASES_ANCHO = ['d-none', 'w-25', 'w-50', 'w-75', 'w-100'];
+    const CLASES_BADGE = ['text-bg-secondary', 'text-bg-warning', 'text-bg-danger'];
+    let ultimoNivelUI = -1;
+
+    function multiplicador() {
+      if (juego.nivelRacha >= 4) return 3;
+      if (juego.nivelRacha >= 2) return 2;
+      return 1;
+    }
+
+    function actualizarRachaUI(forzar) {
+      if (!forzar && ultimoNivelUI === juego.nivelRacha) return;
+      ultimoNivelUI = juego.nivelRacha;
+      el.rachaBarra.classList.remove(...CLASES_ANCHO);
+      el.rachaBarra.classList.add(CLASES_ANCHO[juego.nivelRacha]);
+      el.rachaProgress.setAttribute('aria-valuenow', String(juego.nivelRacha));
+      const m = multiplicador();
+      el.rachaBadge.classList.remove(...CLASES_BADGE);
+      el.rachaBadge.classList.add(CLASES_BADGE[m - 1]);
+      el.rachaBadge.textContent = 'x' + m;
+    }
+
+    function mostrarOverlay(texto, sub) {
+      el.overlay.classList.remove('d-none');
+      if (el.overlayTexto.textContent !== texto) el.overlayTexto.textContent = texto;
+      if (el.overlaySub.textContent !== (sub || '')) el.overlaySub.textContent = sub || '';
+    }
+
+    function ocultarOverlay() {
+      el.overlay.classList.add('d-none');
+    }
+
+    /* ============================================================
+       SECCIÓN JS 6 · CONTROLES (teclado, táctil, pausa)
+       ============================================================ */
+    function encolarDireccion(nombre) {
+      if (juego.estado !== 'jugando' && juego.estado !== 'cuenta') return;
+      const nueva = DIRS[nombre];
+      const ref = juego.cola.length ? juego.cola[juego.cola.length - 1] : juego.dir;
+      if (nueva.x === -ref.x && nueva.y === -ref.y) return;   // no invertir
+      if (nueva.x === ref.x && nueva.y === ref.y) return;     // sin cambio
+      if (juego.cola.length < 2) juego.cola.push(nueva);
+    }
+
+    function pausar() {
+      if (juego.estado !== 'jugando' && juego.estado !== 'cuenta') return;
+      juego.estadoPrevio = juego.estado;
+      juego.estado = 'pausa';
+      el.btnPausa.textContent = '▶';
+      mostrarOverlay('PAUSA', 'Pulsa ▶ o la barra espaciadora para continuar');
+    }
+
+    function reanudar() {
+      if (juego.estado !== 'pausa') return;
+      juego.estado = juego.estadoPrevio;
+      el.btnPausa.textContent = 'II';
+      juego.overlayMs = 0;
+      if (juego.estado === 'jugando') ocultarOverlay();
+    }
+
+    function alternarPausa() {
+      if (juego.estado === 'pausa') reanudar(); else pausar();
+    }
+
+    const TECLAS = {
+      ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
+      w: 'up', s: 'down', a: 'left', d: 'right'
+    };
+
+    document.addEventListener('keydown', (e) => {
+      if (el.modal.classList.contains('show')) return;
+      const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      if (TECLAS[k]) {
+        e.preventDefault();
+        encolarDireccion(TECLAS[k]);
+      } else if (e.code === 'Space') {
+        e.preventDefault();
+        if (!e.repeat) alternarPausa();
+      }
+    });
+
+    document.querySelectorAll('[data-dir]').forEach((btn) => {
+      btn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        encolarDireccion(btn.getAttribute('data-dir'));
+      });
+    });
+
+    el.btnPausa.addEventListener('click', alternarPausa);
+
+    // Pausa automática (RF-04)
+    document.addEventListener('visibilitychange', () => { if (document.hidden) pausar(); });
+    window.addEventListener('blur', pausar);
+
+    /* ============================================================
+       SECCIÓN JS 7 · LÓGICA DE JUEGO (paso, comida, racha, fin)
+       ============================================================ */
+    function paso() {
+      if (juego.cola.length) juego.dir = juego.cola.shift();
+      const cabeza = juego.serpiente[0];
+      const nueva = { x: cabeza.x + juego.dir.x, y: cabeza.y + juego.dir.y };
+
+      if (nueva.x < 0 || nueva.y < 0 || nueva.x >= CONFIG.CUADROS || nueva.y >= CONFIG.CUADROS) {
+        terminar('pared');
+        return;
+      }
+
+      const come = nueva.x === juego.comida.x && nueva.y === juego.comida.y;
+      const cuerpo = come ? juego.serpiente : juego.serpiente.slice(0, -1);
+      if (cuerpo.some((s) => s.x === nueva.x && s.y === nueva.y)) {
+        terminar('cuerpo');
+        return;
+      }
+
+      juego.serpiente.unshift(nueva);
+      if (come) {
+        comerManzana();
+      } else {
+        juego.serpiente.pop();
+      }
+    }
+
+    function comerManzana() {
+      const dentroDeRacha = juego.nivelRacha > 0 && (juego.reloj - juego.ultimaComida) <= CONFIG.RACHA_MS;
+      juego.nivelRacha = dentroDeRacha ? Math.min(CONFIG.RACHA_NIVEL_MAX, juego.nivelRacha + 1) : 1;
+      juego.ultimaComida = juego.reloj;
+      juego.puntaje += CONFIG.PUNTOS_COMIDA * multiplicador();
+      actualizarRachaUI();
+      actualizarHud();
+      colocarComida();
+    }
+
+    function terminar(motivo) {
+      if (juego.estado === 'fin') return;
+      juego.estado = 'fin';
+      juego.motivo = motivo;
+      if (motivo === 'tiempo') {
+        juego.bono = CONFIG.BONO_SUPERVIVENCIA;   // bonificación por terminar con vida
+        juego.puntaje += juego.bono;
+      }
+      actualizarHud(true);
+      registrarPartida();
+      prepararModal();
+      modalFin.show();
+    }
+
+    /* ============================================================
+       SECCIÓN JS 8 · BUCLE PRINCIPAL (requestAnimationFrame + delta)
+       ============================================================ */
+    const ETIQUETAS_CUENTA = ['3', '2', '1', '¡JUGAR!'];
+
+    function actualizar(dt) {
+      if (juego.estado === 'cuenta') {
+        juego.cuentaMs += dt;
+        const idx = Math.floor(juego.cuentaMs / CONFIG.CUENTA_PASO_MS);
+        if (idx >= ETIQUETAS_CUENTA.length - 1) {
+          juego.estado = 'jugando';
+          juego.overlayMs = CONFIG.JUGAR_VISIBLE_MS;
+          mostrarOverlay('¡JUGAR!', '');
+        } else {
+          mostrarOverlay(ETIQUETAS_CUENTA[idx], '');
+        }
+        return;
+      }
+
+      if (juego.estado !== 'jugando') return;
+
+      juego.reloj += dt;
+      juego.tiempoRestante -= dt;
+
+      if (juego.overlayMs > 0) {
+        juego.overlayMs -= dt;
+        if (juego.overlayMs <= 0) ocultarOverlay();
+      }
+
+      if (juego.tiempoRestante <= 0) {
+        juego.tiempoRestante = 0;
+        terminar('tiempo');
+        return;
+      }
+
+      // La racha se pierde si tarda demasiado en comer
+      if (juego.nivelRacha > 0 && (juego.reloj - juego.ultimaComida) > CONFIG.RACHA_MS) {
+        juego.nivelRacha = 0;
+        actualizarRachaUI();
+      }
+
+      juego.acumulador += dt;
+      while (juego.acumulador >= CONFIG.STEP_MS && juego.estado === 'jugando') {
+        juego.acumulador -= CONFIG.STEP_MS;
+        paso();
+      }
+      actualizarHud();
+    }
+
+    function dibujar() {
+      const W = CONFIG.CANVAS;
+      ctx.fillStyle = COLORES.fondo;
+      ctx.fillRect(0, 0, W, W);
+
+      // Rejilla tenue
+      ctx.strokeStyle = COLORES.grilla;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let i = 1; i < CONFIG.CUADROS; i++) {
+        const p = i * CELDA + 0.5;
+        ctx.moveTo(p, 0); ctx.lineTo(p, W);
+        ctx.moveTo(0, p); ctx.lineTo(W, p);
+      }
+      ctx.stroke();
+
+      // Comida
+      ctx.fillStyle = COLORES.pixel;
+      ctx.beginPath();
+      ctx.arc((juego.comida.x + 0.5) * CELDA, (juego.comida.y + 0.5) * CELDA, CELDA * 0.35, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Serpiente
+      juego.serpiente.forEach((s) => {
+        ctx.fillRect(s.x * CELDA + 1, s.y * CELDA + 1, CELDA - 2, CELDA - 2);
+      });
+
+      // Ojo de la cabeza
+      const h = juego.serpiente[0];
+      ctx.fillStyle = COLORES.fondo;
+      ctx.fillRect(h.x * CELDA + CELDA / 2 - 2, h.y * CELDA + CELDA / 2 - 2, 4, 4);
+    }
+
+    let tiempoPrevio = 0;
+    function bucle(ts) {
+      if (!tiempoPrevio) tiempoPrevio = ts;
+      const dt = Math.min(ts - tiempoPrevio, 100);   // limita saltos grandes
+      tiempoPrevio = ts;
+      actualizar(dt);
+      dibujar();
+      requestAnimationFrame(bucle);
+    }
+
+    /* ============================================================
+       SECCIÓN JS 9 · VALIDACIÓN DEL FORMULARIO (RF-10 a RF-12)
+       ============================================================ */
+    const normalizarTelefono = (v) => v.replace(/[\s\-().]/g, '');
+
+    const validadores = {
+      nombre(v) {
+        const t = v.trim();
+        if (t.length < 2 || t.length > 40) return 'Ingresa un nombre de 2 a 40 caracteres.';
+        if (!/^[\p{L}][\p{L}' .-]*$/u.test(t)) return 'Usa solo letras, espacios, puntos, guiones o apóstrofes.';
+        return '';
+      },
+      email(v) {
+        const t = v.trim();
+        if (!t) return 'Ingresa tu correo electrónico.';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(t)) return 'Escribe un correo válido (ej. nombre@correo.com).';
+        return '';
+      },
+      telefono(v) {
+        const t = normalizarTelefono(v);
+        if (!t) return 'Ingresa tu número de WhatsApp o teléfono.';
+        if (!/^\+?\d{9,15}$/.test(t)) return 'Solo números, entre 9 y 15 dígitos.';
+        return '';
+      }
+    };
+
+    const campos = {
+      nombre: { input: el.nombre, error: el.errNombre, tocado: false },
+      email: { input: el.email, error: el.errEmail, tocado: false },
+      telefono: { input: el.telefono, error: el.errTelefono, tocado: false }
+    };
+
+    function validarCampo(clave, mostrar) {
+      const c = campos[clave];
+      const msg = validadores[clave](c.input.value);
+      if (mostrar) {
+        c.error.textContent = msg;
+        c.input.classList.toggle('is-invalid', !!msg);
+        c.input.classList.toggle('is-valid', !msg);
+      }
+      return !msg;
+    }
+
+    function actualizarBoton() {
+      const ok = Object.keys(campos).every((k) => validarCampo(k, campos[k].tocado)) && el.consent.checked;
+      el.btnGuardar.disabled = !ok || juego.guardado;
+    }
+
+    Object.keys(campos).forEach((clave) => {
+      const c = campos[clave];
+      c.input.addEventListener('input', () => { c.tocado = true; actualizarBoton(); });
+      c.input.addEventListener('blur', () => {
+        c.tocado = true;
+        if (clave === 'email' || clave === 'telefono') reutilizarLeadExistente();
+        actualizarBoton();
+      });
+    });
+    el.consent.addEventListener('change', actualizarBoton);
+
+    /* ============================================================
+       SECCIÓN JS 10 · LEADS, DUPLICADOS Y RANKING (RF-13 a RF-16)
+       ============================================================ */
+    function buscarLead(email, telefono) {
+      const leads = almacen.leer(CONFIG.CLAVES.LEADS, []);
+      const e = (email || '').trim().toLowerCase();
+      const t = normalizarTelefono(telefono || '');
+      return leads.find((l) => (e && l.email === e) || (t && l.telefono === t)) || null;
+    }
+
+    function rellenarCampos(lead) {
+      if (!el.nombre.value.trim()) { el.nombre.value = lead.name; campos.nombre.tocado = true; }
+      if (!el.email.value.trim()) { el.email.value = lead.email; campos.email.tocado = true; }
+      if (!el.telefono.value.trim()) { el.telefono.value = lead.telefono; campos.telefono.tocado = true; }
+    }
+
+    function reutilizarLeadExistente() {
+      const lead = buscarLead(el.email.value, el.telefono.value);
+      if (!lead) return;
+      rellenarCampos(lead);
+      el.avisoReutilizado.textContent = 'Ya tenemos tus datos registrados: los reutilizaremos para no duplicarte.';
+      el.avisoReutilizado.classList.remove('d-none');
+    }
+
+    function registrarPartida() {
+      const partidas = almacen.leer(CONFIG.CLAVES.PARTIDAS, []);
+      partidas.push({ id: juego.id, score: juego.puntaje, motivo: juego.motivo, fecha: new Date().toISOString(), leadId: null });
+      almacen.guardar(CONFIG.CLAVES.PARTIDAS, partidas);
+    }
+
+    function calcularPosicion(score) {
+      const mejores = obtenerRanking().filter((r) => r.score >= score).length;
+      return mejores + 1;
+    }
+
+    function premioPara(score) {
+      if (score > CONFIG.UMBRAL_PREMIO_ALTO) return 'Cupón -20%';
+      if (score >= CONFIG.UMBRAL_PREMIO_MEDIO) return 'Cupón -10%';
+      return 'Sigue participando';
+    }
+
+    const MOTIVOS = {
+      pared: 'Chocaste contra el borde.',
+      cuerpo: 'Chocaste contra tu propio cuerpo.',
+      tiempo: '¡Se acabó el tiempo!'
+    };
+
+    function prepararModal() {
+      const pos = calcularPosicion(juego.puntaje);
+      el.finMotivo.textContent = MOTIVOS[juego.motivo] || '';
+      el.finPuntaje.textContent = String(juego.puntaje);
+      el.finPosicion.textContent = '#' + pos;
+      el.finPremio.textContent = premioPara(juego.puntaje);
+      el.finDetalle.textContent = (pos <= 5 ? '¡Estás dentro del Top 5!' : 'Estás fuera del Top 5.') +
+        (juego.bono ? ' Incluye bonificación por sobrevivir: +' + juego.bono + ' pts.' : '');
+
+      // Restablecer formulario
+      el.form.reset();
+      Object.keys(campos).forEach((k) => {
+        campos[k].tocado = false;
+        campos[k].input.classList.remove('is-valid', 'is-invalid');
+        campos[k].error.textContent = '';
+      });
+      el.consent.checked = false;
+      el.avisoReutilizado.classList.add('d-none');
+      el.compartirMsg.hidden = true;
+
+      // Pre-rellenar con el último lead conocido (RF-13)
+      const idUltimo = almacen.leer(CONFIG.CLAVES.ULTIMO_LEAD, '');
+      if (idUltimo) {
+        const lead = almacen.leer(CONFIG.CLAVES.LEADS, []).find((l) => l.id === idUltimo);
+        if (lead) {
+          rellenarCampos(lead);
+          el.avisoReutilizado.textContent = 'Reutilizamos tus datos guardados. Solo confirma la política de privacidad.';
+          el.avisoReutilizado.classList.remove('d-none');
+        }
+      }
+
+      mostrarVista('resumen');
+      actualizarBoton();
+    }
+
+    function mostrarVista(vista) {
+      const resumen = vista === 'resumen';
+      el.vistaResumen.hidden = !resumen;
+      el.pieResumen.hidden = !resumen;
+      el.vistaRanking.hidden = resumen;
+      el.pieRanking.hidden = resumen;
+    }
+
+    function guardarLead() {
+      const nombre = el.nombre.value.trim();
+      const email = el.email.value.trim().toLowerCase();
+      const telefono = normalizarTelefono(el.telefono.value);
+      const ahora = new Date().toISOString();
+      const consentimiento = { aceptado: true, version: CONFIG.CONSENT_VERSION, timestamp: ahora };
+
+      const leads = almacen.leer(CONFIG.CLAVES.LEADS, []);
+      let lead = leads.find((l) => l.email === email || l.telefono === telefono);
+      const existia = !!lead;
+
+      if (lead) {
+        lead.name = nombre; lead.email = email; lead.telefono = telefono;
+        lead.consentimiento = consentimiento; lead.actualizado = ahora;
+      } else {
+        lead = { id: uid(), name: nombre, email, telefono, consentimiento: consentimiento, creado: ahora, actualizado: ahora, partidas: [] };
+        leads.push(lead);
+      }
+      lead.partidas.push({ gameId: juego.id, score: juego.puntaje, fecha: ahora });
+      almacen.guardar(CONFIG.CLAVES.LEADS, leads);
+      almacen.guardar(CONFIG.CLAVES.ULTIMO_LEAD, lead.id);
+
+      // Vincula la partida con el lead
+      const partidas = almacen.leer(CONFIG.CLAVES.PARTIDAS, []);
+      const p = partidas.find((x) => x.id === juego.id);
+      if (p) p.leadId = lead.id;
+      almacen.guardar(CONFIG.CLAVES.PARTIDAS, partidas);
+
+      // Ranking público: solo nombre y puntaje
+      const ranking = obtenerRanking();
+      ranking.push({ id: juego.id, name: nombre, score: juego.puntaje, fecha: ahora });
+      almacen.guardar(CONFIG.CLAVES.RANKING, ordenarRanking(ranking).slice(0, 100));
+
+      juego.guardado = true;
+      juego.idUltimoGuardado = juego.id;
+      return existia;
+    }
+
+    function pintarRanking() {
+      const top = ordenarRanking(obtenerRanking()).slice(0, 5);
+      el.listaRanking.replaceChildren();
+      top.forEach((r) => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item d-flex justify-content-between align-items-center';
+        if (r.id === juego.idUltimoGuardado) li.classList.add('list-group-item-success', 'fw-bold');
+        const nombre = document.createElement('span');
+        nombre.className = 'ms-2 me-auto';
+        nombre.textContent = r.name;
+        const pts = document.createElement('span');
+        pts.className = 'badge text-bg-dark rounded-pill font-monospace';
+        pts.textContent = r.score + ' pts';
+        li.append(nombre, pts);
+        el.listaRanking.appendChild(li);
+      });
+    }
+
+    el.form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      Object.keys(campos).forEach((k) => { campos[k].tocado = true; });
+      actualizarBoton();
+      if (el.btnGuardar.disabled) return;
+      const existia = guardarLead();
+      el.rankingMensaje.textContent = existia
+        ? '¡Puntaje guardado! Actualizamos tu registro existente. Premio: ' + premioPara(juego.puntaje) + '.'
+        : '¡Puntaje guardado! Premio: ' + premioPara(juego.puntaje) + '.';
+      pintarRanking();
+      mostrarVista('ranking');
+    });
+
+    el.btnAhoraNo.addEventListener('click', () => {
+      el.rankingMensaje.textContent = 'No guardaste tu puntaje. Este es el ranking actual.';
+      pintarRanking();
+      mostrarVista('ranking');
+    });
+
+    el.btnJugarDeNuevo.addEventListener('click', () => {
+      modalFin.hide();
+      reiniciar();
+    });
+
+    /* ============================================================
+       SECCIÓN JS 11 · COMPARTIR RESULTADO (RF-22, sin datos personales)
+       ============================================================ */
+    function avisoCompartir(texto) {
+      el.compartirMsg.textContent = texto;
+      el.compartirMsg.hidden = false;
+    }
+
+    async function compartir() {
+      const texto = '¡Hice ' + juego.puntaje + ' pts en Snake! ¿Puedes superarme?';
+      try {
+        if (navigator.share) {
+          await navigator.share({ text: texto, url: location.href });
+          return;
+        }
+        await navigator.clipboard.writeText(texto + ' ' + location.href);
+        avisoCompartir('Resultado copiado al portapapeles.');
+      } catch (err) {
+        if (err && err.name === 'AbortError') return;
+        avisoCompartir(texto);
+      }
+    }
+
+    $('btnCompartir').addEventListener('click', compartir);
+
+    /* ============================================================
+       SECCIÓN JS 12 · ARRANQUE
+       ============================================================ */
+    obtenerRanking();
+    reiniciar();
+    requestAnimationFrame(bucle);
+  })();
+  </script>
+</body>
+</html>
