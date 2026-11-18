@@ -1,18 +1,345 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juegos</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Juegos</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 </head>
 
-<body>
+<body style="background-color: rgb(182, 235, 235);">
+  <!-- Barra de navegación -->
+  <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container">
+      <div class="navbar-brand d-flex align-items-center" href="#">
+        <img src="imagenes/logo.jpg" alt="Logo" width="50" height="50" class="me-2">
+        Snake &amp; Buscaminas
+      </div>
 
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegación">
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link active" href="#">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link" href="#snake">Snake</a></li>
+          <li class="nav-item"><a class="nav-link" href="#buscaminas">Buscaminas</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
 
-    
+  <main class="container my-4">
+
+    <!-- Sección principal -->
+    <div class="row align-items-center g-4">
+
+      <div class="col-xl-6">
+        <h1 class="display-5 fw-bold mb-3 text-center">¡Demuestra de qué eres capaz! 🎮</h1>
+        <h3 class="text-center">¡Participa y lleva tu juego al siguiente nivel!</h3>
+        <p class="lead text-muted mb-4">Guarda tus estadísticas, supera tus propios récords y compite con otros jugadores para demostrar quién es el mejor en Snake y Buscaminas.</p>
+
+        <div class="text-center">
+          <a href="#snake" class="btn btn-lg" style="background-color: #FFC53D;">Comienza a Jugar</a>
+        </div>
+      </div>
+
+      <div class="col-xl-6">
+        <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+
+          <div class="carousel-indicators">
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Diapositiva 1"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Diapositiva 2"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Diapositiva 3"></button>
+          </div>
+
+          <div class="carousel-inner">
+            <div class="carousel-item active">
+              <img src="imagenes/carrusel1.jpg" class="d-block w-100 img-fluid" alt="Juegos Clásicos">
+            </div>
+
+            <div class="carousel-item">
+              <img src="imagenes/carrusel2.jpg" class="d-block w-100 img-fluid" alt="Serpiente">
+            </div>
+
+            <div class="carousel-item">
+              <img src="imagenes/carrusel3.jpg" class="d-block w-100 img-fluid" alt="Busca Minas">
+            </div>
+          </div>
+
+          <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Anterior</span>
+          </button>
+
+          <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Siguiente</span>
+          </button>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Tarjetas -->
+    <div class="row g-4 mt-4">
+
+      <div class="col-12 col-md-4" id="snake">
+        <div class="card h-100"  style="background-color:#C7F0D8">
+          <img src="imagenes/snake.jpeg" class="card-img-top" alt="Snake">
+
+          <div class="card-body">
+            <h5 class="card-title">Snake</h5>
+            <p class="card-text">El clásico juego de la serpiente con colores optimizados para una mejor experiencia.</p>
+          </div>
+
+          <div class="text-center mt-3">
+            <a href="smake.html" class="btn btn-success btn-lg fw-bold w-100">
+                <i class="bi bi-controller"></i> ¡Jugar Snake!
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-4" id="buscaminas">
+        <div class="card h-100" style="background-color: #C0C0C0;">
+          <img src="imagenes/buscaminas.jpg" class="card-img-top" alt="Buscaminas">
+
+          <div class="card-body">
+            <h5 class="card-title">Buscaminas</h5>
+            <p class="card-text">Encuentra todas las minas sin explotar con una paleta de colores clara y legible.</p>
+          </div>
+
+          <div class="text-center mt-3">
+            <a href="buscaminas.html" class="btn btn-dark btn-lg fw-bold w-100">
+              <i class="bi bi-controller"></i> ¡Jugar Buscaminas!
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulario de registro -->
+      <div class="col-12 col-md-4">
+        <div class="card h-100 shadow p-4">
+
+          <h3 class="text-center mb-4">Regístrate para competir con otras personas</h3>
+
+          <form id="formRegistro" novalidate>
+
+            <div class="mb-3">
+              <label for="nombre" class="form-label">Nombre de usuario</label>
+              <input type="text" class="form-control" id="nombre"
+                     placeholder="Ingresa tu nombre" required minlength="3">
+
+              <div class="invalid-feedback">
+                Ingresa un nombre de al menos 3 caracteres.
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="correo" class="form-label">Correo electrónico</label>
+              <input type="email" class="form-control" id="correo"
+                     placeholder="ejemplo@correo.com" required>
+
+              <div class="invalid-feedback">
+                Ingresa un correo electrónico válido.
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="password" class="form-label">Contraseña</label>
+              <input type="password" class="form-control" id="password"
+                     placeholder="Mínimo 8 caracteres" required minlength="8">
+
+              <div class="invalid-feedback">
+                La contraseña debe tener al menos 8 caracteres.
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="confirmarPassword" class="form-label">
+                Confirmar contraseña
+              </label>
+
+              <input type="password" class="form-control"
+                     id="confirmarPassword"
+                     placeholder="Repite tu contraseña" required>
+
+              <div class="invalid-feedback">
+                Las contraseñas no coinciden.
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg w-100">
+              Registrarse
+            </button>
+
+          </form>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Ranking TOP 5 -->
+    <div class="row mt-4">
+      <div class="col-12">
+        <div class="card shadow-sm p-3">
+
+          <h5 class="fw-bold">TOP 5 DE LA SEMANA</h5>
+
+          <ol id="listaRanking" class="mb-2">
+            <!-- Los jugadores aparecerán aquí -->
+          </ol>
+
+          <button class="btn btn-outline-primary w-100 fw-bold">
+            Ver ranking completo
+          </button>
+
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Pie de página -->
+  <footer class="text-white text-center py-4" style="background-color: #1F4FD8">
+    <div class="container">
+      <p class="mb-0">&copy; 2026 Snake y Buscaminas</p>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+
+  <!-- JavaScript del registro y ranking -->
+  <script>
+
+    const formulario = document.getElementById("formRegistro");
+
+    const password = document.getElementById("password");
+    const confirmarPassword = document.getElementById("confirmarPassword");
+
+    // Validar que las contraseñas coincidan
+    function validarPassword() {
+
+      if (password.value !== confirmarPassword.value) {
+        confirmarPassword.setCustomValidity("Las contraseñas no coinciden");
+      } else {
+        confirmarPassword.setCustomValidity("");
+      }
+
+    }
+
+    password.addEventListener("input", validarPassword);
+    confirmarPassword.addEventListener("input", validarPassword);
+
+    // Obtener jugadores guardados
+    function obtenerJugadores() {
+
+      return JSON.parse(localStorage.getItem("jugadores")) || [];
+
+    }
+
+    // Registrar jugador
+    function guardarJugador(nombre) {
+
+      let jugadores = obtenerJugadores();
+
+      // Evitar nombres duplicados
+      let existe = jugadores.some(
+        jugador => jugador.nombre.toLowerCase() === nombre.toLowerCase()
+      );
+
+      if (existe) {
+        alert("Este nombre de usuario ya está registrado.");
+        return false;
+      }
+
+      jugadores.push({
+        nombre: nombre,
+        puntos: 0
+      });
+
+      localStorage.setItem("jugadores", JSON.stringify(jugadores));
+
+      mostrarRanking();
+
+      return true;
+
+    }
+
+    // Mostrar TOP 5
+    function mostrarRanking() {
+
+      let jugadores = obtenerJugadores();
+
+      // Ordenar de mayor a menor puntuación
+      jugadores.sort((a, b) => b.puntos - a.puntos);
+
+      let lista = document.getElementById("listaRanking");
+
+      lista.innerHTML = "";
+
+      jugadores.slice(0, 5).forEach(jugador => {
+
+        let elemento = document.createElement("li");
+        elemento.className = "d-flex justify-content-between mb-1";
+
+        let nombre = document.createElement("span");
+        nombre.textContent = jugador.nombre;
+
+        let puntos = document.createElement("strong");
+        puntos.textContent = jugador.puntos;
+
+        elemento.appendChild(nombre);
+        elemento.appendChild(puntos);
+
+        lista.appendChild(elemento);
+
+      });
+
+    }
+
+    // Procesar el formulario
+    formulario.addEventListener("submit", function(event) {
+
+      event.preventDefault();
+
+      // Eliminar espacios al inicio y al final
+      document.getElementById("nombre").value =
+        document.getElementById("nombre").value.trim();
+
+      validarPassword();
+
+      formulario.classList.add("was-validated");
+
+      // Comprobar las validaciones
+      if (!formulario.checkValidity()) {
+        return;
+      }
+
+      let nombre = document.getElementById("nombre").value;
+
+      // Guardar jugador
+      if (guardarJugador(nombre)) {
+
+        alert("¡Registro exitoso! Ya formas parte del ranking.");
+
+        formulario.reset();
+
+        formulario.classList.remove("was-validated");
+
+      }
+
+    });
+
+    // Mostrar ranking al cargar la página
+    mostrarRanking();
+
+  </script>
+
 </body>
-
 </html>
