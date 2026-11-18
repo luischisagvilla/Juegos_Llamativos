@@ -8,7 +8,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 </head>
 
-<body>
+<body style="background-color: rgb(182, 235, 235);">
   <!-- Barra de navegación -->
   <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container">
@@ -42,7 +42,7 @@
         <p class="lead text-muted mb-4">Guarda tus estadísticas, supera tus propios récords y compite con otros jugadores para demostrar quién es el mejor en Snake y Buscaminas.</p>
 
         <div class="text-center">
-          <a href="#snake" class="btn btn-primary btn-lg">Comienza a Jugar</a>
+          <a href="#snake" class="btn btn-lg" style="background-color: #FFC53D;">Comienza a Jugar</a>
         </div>
       </div>
 
@@ -88,23 +88,35 @@
     <div class="row g-4 mt-4">
 
       <div class="col-12 col-md-4" id="snake">
-        <div class="card h-100">
+        <div class="card h-100"  style="background-color:#C7F0D8">
           <img src="imagenes/snake.jpg" class="card-img-top" alt="Snake">
 
           <div class="card-body">
             <h5 class="card-title">Snake</h5>
             <p class="card-text">El clásico juego de la serpiente con colores optimizados para una mejor experiencia.</p>
           </div>
+
+          <div class="text-center mt-3">
+            <a href="snake.html" class="btn btn-success btn-lg fw-bold w-100">
+                <i class="bi bi-controller"></i> ¡Jugar Snake!
+            </a>
+          </div>
         </div>
       </div>
 
       <div class="col-12 col-md-4" id="buscaminas">
-        <div class="card h-100">
+        <div class="card h-100" style="background-color: #C0C0C0;">
           <img src="imagenes/buscaminas.jpg" class="card-img-top" alt="Buscaminas">
 
           <div class="card-body">
             <h5 class="card-title">Buscaminas</h5>
             <p class="card-text">Encuentra todas las minas sin explotar con una paleta de colores clara y legible.</p>
+          </div>
+
+          <div class="text-center mt-3">
+            <a href="buscaminas.html" class="btn btn-dark btn-lg fw-bold w-100">
+              <i class="bi bi-controller"></i> ¡Jugar Buscaminas!
+            </a>
           </div>
         </div>
       </div>
@@ -113,7 +125,7 @@
       <div class="col-12 col-md-4">
         <div class="card h-100 shadow p-4">
 
-          <h3 class="text-center mb-4">Ingresa tus datos</h3>
+          <h3 class="text-center mb-4">Regístrate para competir con otras personas</h3>
 
           <form id="formRegistro" novalidate>
 
@@ -193,9 +205,9 @@
   </main>
 
   <!-- Pie de página -->
-  <footer class="bg-dark text-white text-center py-4">
+  <footer class="text-white text-center py-4" style="background-color: #1F4FD8">
     <div class="container">
-      <p class="mb-0">&copy; 2026 Paleta de Colores - Snake y Buscaminas</p>
+      <p class="mb-0">&copy; 2026 Snake y Buscaminas</p>
     </div>
   </footer>
 
